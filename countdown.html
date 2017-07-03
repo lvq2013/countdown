@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="Generator" content="WebStorm">
+    <meta name="Author" content="Desperado">
+    <meta name="Keywords" content="">
+    <meta name="Description" content="">
+    <title>一天的倒计时</title>
+    <style>
+        *{
+            margin:0;
+            padding: 0;
+        }
+        div{
+            overflow: hidden;
+        }
+        p{
+            height:51px;
+            float: left;
+            overflow: hidden;
+        }
+        p span {
+            display: block;
+            float: left;
+            width: 36px;
+            height: 51px;
+            background-image:url("1.png");
+            background-position: 0 -1px;
+        }
+        p b{
+            line-height: 51px;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <p class="hour">
+        <span></span><span></span>
+        <b>时</b>
+    </p>
+    <p class="minute"><span></span><span></span>
+        <b>分</b>
+    </p>
+    <p class="second"><span></span><span></span>
+        <b>秒</b>
+    </p>
+
+</div>
+</body>
+<script>
+    var oHH = document.getElementsByClassName("hour")[0];
+    var oMM = document.getElementsByClassName("minute")[0];
+    var oSS = document.getElementsByClassName("second")[0];
+
+    var hSpan = oHH.getElementsByTagName("span");
+    var mSpan = oMM.getElementsByTagName("span");
+    var sSpan = oSS.getElementsByTagName("span");
+
+    countDown({
+        date : '2017.7.8 0:0:0',
+        success : function (h ,m ,s) {
+            for(var i=0; i<2;i++){
+                hSpan[i].style.backgroundPosition= "0 " +(-52*6*h[i]-1) +'px';
+                mSpan[i].style.backgroundPosition= "0 " +(-52*6*m[i]-1) +'px';
+                sSpan[i].style.backgroundPosition= "0 " +(-52*6*s[i]-1) +'px';
+            }
+        },
+        callback : function () {
+            alert("倒计时结束")
+        }
+    });
+
+    /*
+     countDown({
+     date : '2017-10-01 0:0:0',
+     success : function(a,b,c){
+     console.log('离国庆节还剩'+a+'小时'+b+'分钟'+c+'秒！');
+     },
+     callback : function(){
+     alert('伟大祖国生日快乐！');
+     }
+     });*/
+
+    function countDown(json) {
+
+        //使用正则 \ / . - 四种事件间隔符得匹配
+        var dateStr = json.date;
+        var dateArr = dateStr.split(" ");
+        var regD = /[\/.-]/g;
+        var regT = /:/g;
+        var a = dateArr[0].split(regD);
+        var b = (dateArr[1] && dateArr[1].split(regT)) || [];
+       
+        var year,month,day,hour,minute,second;
+        year = a[0];
+        month = a[1] -1 || 1  ;
+        day = a[2]  || 1;
+        hour = b[0] || 0; //默认时间，如果用户没写则用这个
+        minute = b[1] || 0;
+        second = b[2] || 0;
+
+      
+
+        var targetDate = new Date(year,month,day,hour,minute,second);
+       
+        var nowDate = new Date();
+        var DateMinus = targetDate - nowDate;
+        if(DateMinus < 0){
+            alert('时间戳不能在当前时间之前');
+            return
+        }
+
+
+        run();
+        var timer = setInterval(run,1000);
+        function run() {
+            var nowDate = new Date(),
+                DateMinus = targetDate - nowDate,
+                hh = parseInt(DateMinus / 1000 / 60 / 60),
+                mm = parseInt((DateMinus / 1000 / 60) % 60),
+                ss = parseInt((DateMinus / 1000) % 60);
+            hh = two(hh);
+            mm = two(mm);
+            ss = two(ss);
+            json.success && json.success(hh,mm,ss);
+            if( hh === 0 && mm === 0 && ss === 0){
+                clearInterval(timer);
+                json.callback && json.callback();
+            }
+        }
+    }
+    function two(num ){
+        return num<10 ? '0'+num : num+'';//转换为字符串
+    }
+
+</script>
+</html>
